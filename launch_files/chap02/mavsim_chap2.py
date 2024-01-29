@@ -44,7 +44,7 @@ print("Press Esc to exit...")
 while sim_time < end_time:
     # -------vary states to check viewer-------------
     if motions_time < time_per_motion:
-        state.north += 10*SIM.ts_simulation
+        state.north += 100*SIM.ts_simulation
     elif motions_time < time_per_motion*2:
         state.east += 10*SIM.ts_simulation
     elif motions_time < time_per_motion*3:
