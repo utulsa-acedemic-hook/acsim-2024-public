@@ -56,8 +56,8 @@ delta = MsgDelta()
 
 #initialize the mav parameters
 Va = 30.
-alpha = np.rad2deg(5.0)
-beta = np.rad2deg(0.0)
+alpha = np.deg2rad(5.0)
+beta = np.deg2rad(0.0)
 mav.initialize_velocity(Va, alpha, beta)
 mav.initialize_state()
 
@@ -72,7 +72,7 @@ delta.aileron = 0.00
 delta.rudder = -0.000
 delta.throttle = 0.6768
 
-compute_trim(mav, copy.deepcopy(delta))
+compute_trim(mav, delta)
     
 # main simulation loop
 print("Press 'Esc' to exit...")

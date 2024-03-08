@@ -35,6 +35,9 @@ class MavDynamics(MavDynamicsForces):
 
     def initialize_velocity(self, Va: float, alpha: float, beta: float):
         self._Va = Va
+        self._state[3] = np.cos(alpha) * np.cos(beta) * Va
+        self._state[4] = np.sin(beta) * Va
+        self._state[5] = np.sin(alpha) * np.cos(beta) * Va
         self._alpha = alpha
         self._beta = beta
         
@@ -45,6 +48,15 @@ class MavDynamics(MavDynamicsForces):
         # update the message class for the true state
         self._update_true_state()
 
+    def compute_trim_obj_func(self, x) -> float:
+        delta = MsgDelta()
+        delta.elevator = x[0]
+        delta.throttle = x[1]
+        self._alpha = x[2]
+        delta.aileron = 0
+        delta.rudder = 0
+        forces = self._forces_moments(delta=delta)
+        return (forces[0] ** 2 + forces[2] ** 2 + forces[4] ** 2)
     ###################################
     # public functions
     def update(self, delta, wind, mode="all") -> list | None:
