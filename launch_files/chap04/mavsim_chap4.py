@@ -20,6 +20,7 @@ from models.wind_simulation import WindSimulation
 from viewers.mav_viewer import MavViewer
 from viewers.data_viewer import DataViewer
 from message_types.msg_delta import MsgDelta
+from mystuff.process_control_inputs import process_control_inputs
 
 #quitter = QuitListener()
 
@@ -27,6 +28,7 @@ VIDEO = False
 PLOTS = True
 ANIMATION = True
 SAVE_PLOT_IMAGE = False
+
 
 if VIDEO is True:
     from viewers.video_writer import VideoWriter
@@ -52,17 +54,19 @@ delta = MsgDelta()
 # initialize the simulation time
 sim_time = SIM.start_time
 plot_time = sim_time
-end_time = 60
-
+end_time = 100
+delta.elevator = -0.1248
+delta.aileron = 0.001836
+delta.rudder = -0.0003026
+delta.throttle = 0.6768
+    
 # main simulation loop
 print("Press 'Esc' to exit...")
 while sim_time < end_time:
-    # ------- set control surfaces -------------
-    delta.elevator = -0.1248
-    delta.aileron = 0.001836
-    delta.rudder = -0.0003026
-    delta.throttle = 0.6768
-
+    # ------- set control surfaces -------------    
+    
+    process_control_inputs(delta)
+       
     # ------- physical system -------------
     current_wind = wind.update()  # get the new wind vector
     mav.update(delta, current_wind)  # propagate the MAV dynamics
