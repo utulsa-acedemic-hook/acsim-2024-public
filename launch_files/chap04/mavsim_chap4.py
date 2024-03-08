@@ -21,6 +21,7 @@ from viewers.mav_viewer import MavViewer
 from viewers.data_viewer import DataViewer
 from message_types.msg_delta import MsgDelta
 from mystuff.process_control_inputs import process_control_inputs
+from mystuff.trim import compute_trim
 
 #quitter = QuitListener()
 
@@ -55,10 +56,14 @@ delta = MsgDelta()
 sim_time = SIM.start_time
 plot_time = sim_time
 end_time = 100
+
+
 delta.elevator = -0.1248
-delta.aileron = 0.001836
-delta.rudder = -0.0003026
+delta.aileron = 0.00
+delta.rudder = -0.000
 delta.throttle = 0.6768
+
+
     
 # main simulation loop
 print("Press 'Esc' to exit...")
