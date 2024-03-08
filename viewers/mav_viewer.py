@@ -6,23 +6,34 @@ scsim_python: spacecraft viewer (for appendix C)
         7/13/2023 - RWB
         1/16/2024 - RWB
 """
+
 import pyqtgraph.opengl as gl
 import pyqtgraph.Vector as Vector
 from viewers.draw_mav import DrawMav
 
-class MavViewer():
-    def __init__(self, app):
+
+class MavViewer:
+    def __init__(self, app, mode="all"):
         self.scale = 100
         # initialize Qt gui application and window
         self.app = app  # initialize QT, external so that only one QT process is running
         self.window = gl.GLViewWidget()  # initialize the view object
-        self.window.setWindowTitle('Mav Viewer')
-        grid = gl.GLGridItem() # make a grid to represent the ground
-        grid.scale(200, 200, 200) # set the size of the grid (distance between each line)
-        self.window.addItem(grid) # add grid to viewer
-        self.window.setCameraPosition(distance=200) # distance from center of plot to camera
-        self.window.setBackgroundColor('k')  # set background color to black
-        self.window.setGeometry(0, 0, 750, 750)  # args: upper_left_x, upper_right_y, width, height
+        self.window.setWindowTitle("Mav Viewer")
+        grid = gl.GLGridItem()  # make a grid to represent the ground
+        grid.scale(
+            200, 200, 200
+        )  # set the size of the grid (distance between each line)
+        self.window.addItem(grid)  # add grid to viewer
+        if mode == "long":
+            self.window.setCameraPosition(azimuth=0, elevation=0, distance=200)
+        else:
+            self.window.setCameraPosition(
+                distance=200
+            )  # distance from center of plot to camera
+        self.window.setBackgroundColor("k")  # set background color to black
+        self.window.setGeometry(
+            0, 0, 750, 750
+        )  # args: upper_left_x, upper_right_y, width, height
         # center = self.window.cameraPosition()
         # center.setX(250)
         # center.setY(250)
@@ -30,7 +41,7 @@ class MavViewer():
         # self.window.setCameraPosition(pos=center, distance=self.scale, elevation=50, azimuth=-90)
         self.window.show()  # display configured window
         # self.window.raise_() # bring window to the front
-        self.plot_initialized = False # has the mav been plotted yet?
+        self.plot_initialized = False  # has the mav been plotted yet?
         self.sc_plot = []
 
     def update(self, state):
@@ -42,8 +53,10 @@ class MavViewer():
         else:
             self.sc_plot.update(state)
         # update the center of the camera view to the spacecraft location
-        view_location = Vector(state.east, state.north, state.altitude)  # defined in ENU coordinates
-        self.window.opts['center'] = view_location
+        view_location = Vector(
+            state.east, state.north, state.altitude
+        )  # defined in ENU coordinates
+        self.window.opts["center"] = view_location
         # redraw
 
     def process_app(self):

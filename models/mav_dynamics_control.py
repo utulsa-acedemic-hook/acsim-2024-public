@@ -47,7 +47,10 @@ class MavDynamics(MavDynamicsForces):
         '''
         # get forces and moments acting on rigid bod
         forces_moments = self._forces_moments(delta)
-        # if all
+        if mode == "long":
+            forces_moments[1] = 0.0
+            forces_moments[3] = 0.0
+            forces_moments[5] = 0.0
         super()._rk4_step(forces_moments)
         # update the airspeed, angle of attack, and side slip angles using new state
         self._update_velocity_data(wind)

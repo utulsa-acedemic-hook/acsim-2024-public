@@ -28,7 +28,7 @@ VIDEO = False
 PLOTS = True
 ANIMATION = True
 SAVE_PLOT_IMAGE = False
-
+mode = "all"
 
 if VIDEO is True:
     from viewers.video_writer import VideoWriter
@@ -40,7 +40,7 @@ if VIDEO is True:
 if ANIMATION or PLOTS:
     app = pg.QtWidgets.QApplication([]) # use the same main process for Qt applications
 if ANIMATION:
-    mav_view = MavViewer(app=app)  # initialize the mav viewer
+    mav_view = MavViewer(app=app, mode=mode)  # initialize the mav viewer
 if PLOTS:
     # initialize view of data plots
     data_view = DataViewer(app=app,dt=SIM.ts_simulation, plot_period=SIM.ts_plot_refresh, 
@@ -69,7 +69,7 @@ while sim_time < end_time:
        
     # ------- physical system -------------
     current_wind = wind.update()  # get the new wind vector
-    mav.update(delta, current_wind)  # propagate the MAV dynamics
+    mav.update(delta, current_wind, mode=mode)  # propagate the MAV dynamics
 
     # -------update viewer-------------
     if ANIMATION:
