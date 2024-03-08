@@ -22,6 +22,8 @@ from viewers.data_viewer import DataViewer
 from message_types.msg_delta import MsgDelta
 from mystuff.process_control_inputs import process_control_inputs
 from mystuff.trim import compute_trim
+import numpy as np
+import copy
 
 #quitter = QuitListener()
 
@@ -52,6 +54,13 @@ wind = WindSimulation(SIM.ts_simulation)
 mav = MavDynamics(SIM.ts_simulation)
 delta = MsgDelta()
 
+#initialize the mav parameters
+Va = 30.
+alpha = np.rad2deg(5.0)
+beta = np.rad2deg(0.0)
+mav.initialize_velocity(Va, alpha, beta)
+mav.initialize_state()
+
 # initialize the simulation time
 sim_time = SIM.start_time
 plot_time = sim_time
@@ -63,7 +72,7 @@ delta.aileron = 0.00
 delta.rudder = -0.000
 delta.throttle = 0.6768
 
-
+compute_trim(mav, copy.deepcopy(delta))
     
 # main simulation loop
 print("Press 'Esc' to exit...")
