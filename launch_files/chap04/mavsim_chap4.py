@@ -79,10 +79,10 @@ while sim_time < end_time:
     # ------- set control surfaces -------------    
     
     process_control_inputs(delta)
-    if np.fabs(sim_time - 3.) < 0.01:
-        delta.elevator = delta.elevator + .2
-    else:
-        delta.elevator = elevator
+    # if np.fabs(sim_time - 3.) < 0.01:
+    #     delta.elevator = delta.elevator + .2
+    # else:
+    #     delta.elevator = elevator
     # ------- physical system -------------
     current_wind = wind.update()  # get the new wind vector
     mav.update(delta, current_wind)  # propagate the MAV dynamics
