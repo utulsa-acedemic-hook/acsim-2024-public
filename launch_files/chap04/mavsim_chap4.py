@@ -21,6 +21,8 @@ from viewers.mav_viewer import MavViewer
 from viewers.data_viewer import DataViewer
 from message_types.msg_delta import MsgDelta
 from mystuff.process_control_inputs import process_control_inputs
+from mystuff.trim import compute_trim
+import numpy as np
 
 #quitter = QuitListener()
 
@@ -51,22 +53,36 @@ wind = WindSimulation(SIM.ts_simulation)
 mav = MavDynamics(SIM.ts_simulation)
 delta = MsgDelta()
 
+# create initialization parameters
+Va0 = 20.
+alpha0 = 0.
+beta0 = 0.
+mav.initialize_velocity(Va0, alpha0, beta0)
+
 # initialize the simulation time
 sim_time = SIM.start_time
 plot_time = sim_time
 end_time = 100
 delta.elevator = -0.1248
-delta.aileron = 0.001836
-delta.rudder = -0.0003026
+delta.aileron = 0.0
+delta.rudder = -0.0
 delta.throttle = 0.6768
-    
+
+alpha, elevator, throttle = compute_trim(mav, delta)
+mav.initialize_velocity(Va0, alpha, beta0)
+delta.elevator = elevator
+delta.throttle = throttle
+print(alpha, delta.elevator, delta.throttle)
 # main simulation loop
 print("Press 'Esc' to exit...")
 while sim_time < end_time:
     # ------- set control surfaces -------------    
     
     process_control_inputs(delta)
-       
+    if np.fabs(sim_time - 3.) < 0.01:
+        delta.elevator = delta.elevator + .2
+    else:
+        delta.elevator = elevator
     # ------- physical system -------------
     current_wind = wind.update()  # get the new wind vector
     mav.update(delta, current_wind)  # propagate the MAV dynamics
