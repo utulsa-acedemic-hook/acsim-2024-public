@@ -6,10 +6,11 @@ compute_ss_model
 """
 import numpy as np
 from scipy.optimize import minimize
-from tools.rotations import Euler2Quaternion, Quaternion2Euler
+from tools.rotations import euler_to_quaternion, quaternion_to_euler
 import parameters.aerosonde_parameters as MAV
 from parameters.simulation_parameters import ts_simulation as Ts
 from message_types.msg_delta import MsgDelta
+from models.mav_dynamics_control import MavDynamics
 
 
 def compute_model(mav, trim_state, trim_input):
@@ -89,7 +90,7 @@ def compute_tf_model(mav, trim_state, trim_input):
     mav._update_velocity_data()
     Va_trim = mav._Va
     alpha_trim = mav._alpha
-    phi, theta_trim, psi = Quaternion2Euler(trim_state[6:10])
+    phi, theta_trim, psi = quaternion_to_euler(trim_state[6:10])
 
     ###### TODO ######
     # define transfer function constants
@@ -127,19 +128,32 @@ def euler_state(x_quat):
     # convert state x with attitude represented by quaternion
     # to x_euler with attitude represented by Euler angles
     
-    ##### TODO #####
     x_euler = np.zeros((12,1))
+    x_euler[0:3] = x_quat[0:3]
+    x_euler[3:6] = x_quat[3:6]
+    phi, theta, psi = quaternion_to_euler(x_quat[6:10])
+    x_euler[6] = phi
+    x_euler[7] = theta
+    x_euler[8] = psi
+    x_euler[9:12] = x_quat[10:13]
     return x_euler
 
 def quaternion_state(x_euler):
     # convert state x_euler with attitude represented by Euler angles
     # to x_quat with attitude represented by quaternions
 
-    ##### TODO #####
     x_quat = np.zeros((13,1))
+    x_quat[0:3] = x_euler[0:3]
+    x_quat[3:6] = x_euler[3:6]
+    phi = x_euler.item(6)
+    theta = x_euler.item(7)
+    psi = x_euler.item(8)
+    x_quat[6:10] = euler_to_quaternion(phi, theta, psi)
+    x_quat[10:13] = x_euler[9:12]
+    
     return x_quat
 
-def f_euler(mav, x_euler, delta):
+def f_euler(mav: MavDynamics, x_euler: list, delta: MsgDelta):
     # return 12x1 dynamics (as if state were Euler state)
     # compute f at euler_state, f_euler will be f, except for the attitude states
 
@@ -150,17 +164,27 @@ def f_euler(mav, x_euler, delta):
     x_quat = quaternion_state(x_euler)
     mav._state = x_quat
     mav._update_velocity_data()
-    ##### TODO #####
-    f_euler_ = np.zeros((12,1))
+    f = mav._f 
+    
+    f_euler_ = euler_state(f)
 
     return f_euler_
 
 def df_dx(mav, x_euler, delta):
     # take partial of f_euler with respect to x_euler
     eps = 0.01  # deviation
-
-    ##### TODO #####
     A = np.zeros((12, 12))  # Jacobian of f wrt x
+    for i in range(12):
+        x_euler_1 = x_euler
+        x_euler_2 = x_euler
+        x_euler_1[i] += eps/2.
+        x_euler_2[i] -= eps/2.
+        f1 = f_euler(mav, x_euler_1, delta)
+        f2 = f_euler(mav, x_euler_2, delta)
+        A[:, i] = (f1 - f2) / eps
+    
+    ##### TODO #####
+    
     return A
 
 
