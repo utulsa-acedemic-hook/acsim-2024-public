@@ -19,11 +19,13 @@ import parameters.simulation_parameters as SIM
 from tools.signals import Signals
 from models.mav_dynamics_control import MavDynamics
 from models.wind_simulation import WindSimulation
-from control.autopilot import Autopilot
+from controllers.autopilot import Autopilot
 # from control.autopilot_lqr import Autopilot
 # from control.autopilot_tecs import Autopilot
 from viewers.mav_viewer import MavViewer
 from viewers.data_viewer import DataViewer
+from message_types.msg_delta import MsgDelta
+from mystuff.trim import do_trim
 
 #quitter = QuitListener()
 
@@ -52,8 +54,12 @@ if PLOTS:
 # initialize elements of the architecture
 wind = WindSimulation(SIM.ts_simulation)
 mav = MavDynamics(SIM.ts_simulation)
-autopilot = Autopilot(SIM.ts_simulation)
 
+delta = MsgDelta()
+# create initialization parameters
+delta = do_trim(mav=mav, Va=25.0, alpha=0.0)
+
+autopilot = Autopilot(SIM.ts_simulation, mav, delta)
 # autopilot commands
 from message_types.msg_autopilot import MsgAutopilot
 commands = MsgAutopilot()
